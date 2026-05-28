@@ -1,5 +1,7 @@
 package it.giuval.cloud.dss_service.controller;
 
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +33,20 @@ public class NotificationController {
 
 		log.info("Utente " + userId + " connesso al canale di notifiche SSE!");
 		// Trasformiamo le stringhe del servizio in eventi SSE standard per il browser
-		return notificationService.getGlobalFlux()
+		Flux<ServerSentEvent<String>> realNotifications = notificationService.getGlobalFlux()
 				.map(data -> ServerSentEvent.<String>builder()
+						.event("message")
 						.data(data)
-						.build())
+						.build());
+		
+		Flux<ServerSentEvent<String>> heartbeat = Flux.interval(Duration.ofSeconds(20))
+				.map(i -> ServerSentEvent.<String>builder()
+						.comment("keep-alive") 
+						.build());
+		
+		return Flux.merge(realNotifications, heartbeat)
 				.doOnCancel(() -> {
-					System.out.println("NOTIFICA BACKEND: Un client Angular si è disconnesso dal canale SSE (doOnCancel)!");
+					System.out.println("NOTIFICA BACKEND: Un client si è disconnesso dal canale SSE (doOnCancel)!");
 				})
 				.doOnError(e -> {
 					System.out.println("Connessione interrotta bruscamente: " + e.getMessage());
