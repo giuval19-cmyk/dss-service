@@ -1,8 +1,9 @@
 package it.giuval.cloud.dss_service.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -43,16 +44,21 @@ public class InfluxQueryService {
 
 		try (Stream<Object[]> rowStream = influxClient.query(sqlQuery)) {
 
-			Map<String, List<Object[]>> groupedBySourceApp = rowStream
+			Map<String, List<Object[]>> groupedBySourceApp = new LinkedHashMap<>();
+			
+			rowStream
 					.filter(row -> row != null && row[0] != null && row[1] != null && row[2] != null)
-					.collect(Collectors.groupingBy(row -> row[1].toString()));//RAGGRUPPIAMO ANCORA PER sourceApp
+					.forEach(row -> {
+						String sourceApp = row[1].toString();
+						
+						groupedBySourceApp.computeIfAbsent(sourceApp, k -> new ArrayList<>()).add(row);
+					});
 
 			return groupedBySourceApp.entrySet().stream()
 					.map(entry -> {
 						String priority = entry.getKey();
 						List<Object[]> trendRows = entry.getValue();
 
-						// TRASFORMAZIONE IN DATAPOINT: L'asse X questa volta è la DATA!
 						List<PointDTO> timePoints = extractTrends(trendRows);
 
 						return new ChartSeriesDTO(priority, timePoints);
