@@ -4,16 +4,16 @@ Il **DSS Service** è il componente analitico dell'ecosistema, progettato per ag
 
 ---
 
-## 🚀 Funzionalità Principali & Competenze Dimostrate
+## 🚀 Funzionalità Principali
 
-* **Architettura Event-Driven (Reactive Consumer):** Il servizio non espone API di scrittura sincrone. Rimane in ascolto degli eventi di business (es. la creazione di ticket di supporto) pubblicati sul Message Broker, elaborandoli in background senza impattare sulle performance dei servizi core.
-* **Integrazione con Spring Cloud Stream:** Implementa la comunicazione asincrona sfruttando l'approccio funzionale di Spring Cloud Stream (`java.util.function.Consumer`), astraendo la logica di business dal broker sottostante.
-* **Database Temporale (InfluxDB Cloud):** Per l'analisi dei dati e della telemetria, il servizio utilizza **InfluxDB**, un database NoSQL ottimizzato per serie temporali (*Time-Series*). Permette di tracciare metriche sui ticket, tempi di risoluzione e trend prestazionali aggregati nel tempo.
+* **Architettura Event-Driven:** Il servizio rimane in ascolto degli eventi di business (es. la creazione di ticket di supporto) pubblicati sul Message Broker, elaborandoli in background senza impattare sulle performance dei servizi core.
+* **Integrazione con Spring Cloud Stream:** Implementa la comunicazione asincrona sfruttando l'approccio funzionale di Spring Cloud Stream, astraendo la logica di business dal broker sottostante.
+* **Database Temporale (InfluxDB Cloud):** Per l'analisi dei dati e della telemetria, il servizio utilizza **InfluxDB**, un database NoSQL ottimizzato per serie temporali. Permette di tracciare metriche sui ticket, tempi di risoluzione e trend prestazionali aggregati nel tempo.
 * **Service Discovery (Eureka Client):** Si registra autonomamente sull'interfaccia di **Eureka** per segnalare il proprio stato di salute e permettere il monitoraggio distribuito da parte del Gateway.
 
 ---
 
-## 🛡️ Meccanismi di Fault Tolerance & Resilienza (DLQ)
+## 🛡️ Meccanismi di Fault Tolerance & Resilienza
 
 In un sistema distribuito, i sistemi di messaggistica possono fallire a causa di dati malformati o downtime dei database. Il DSS Service implementa una strategia di tolleranza ai guasti robusta ed elegante su **RabbitMQ (CloudAMQP)**:
 
@@ -31,3 +31,10 @@ Il modulo delega interamente la gestione dei propri endpoint sensibili al **Conf
 ```properties
 spring.application.name=dss-service
 server.port=8082
+```
+
+## 🐳 Containerizzazione
+
+Il servizio include una strategia di containerizzazione avanzata basata su **Multi-Stage Build**
+
+   docker build -t dss-service:latest .

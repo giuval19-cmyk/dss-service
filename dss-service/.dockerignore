@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gitmodules
+.dockerignore
+target/
+*.md
+.idea
+.settings/
+.mvn/
+mvnw
+mvnw.cmd
+.classpath
+.project
+README.md
